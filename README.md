@@ -7,8 +7,7 @@
 As we create more modules, it will become useful to be able to create a module from a template. This is a desktop compose application that allows one to create modules without having to copy / paste / modify existing modules.
 
 ## Example
-[![example](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/YouTube_Diamond_Play_Button.png/1024px-YouTube_Diamond_Play_Button.png)](./assets/example.mov)
-
+https://github.com/j-roskopf/ModuleMaker/blob/main/assets/example.mov
 
 ## How to contribute
 1. Download [IntelliJ](https://www.jetbrains.com/idea/download/)
