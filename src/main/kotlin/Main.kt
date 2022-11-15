@@ -2,23 +2,47 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
-import composables.SelectedDirectory
 import composables.ModuleName
 import composables.ModuleType
+import composables.SelectedDirectory
 import composables.SelectedSettingsGradle
+import composables.settings.Settings
 import data.ModuleType
 import file.FileWriter
-import filetree.*
+import filetree.File
+import filetree.FileTree
+import filetree.RootFolder
 import filetree.ui.FileTreeView
 import filetree.ui.FileTreeViewTabView
 import filetree.ui.PanelState
@@ -28,9 +52,11 @@ import ui.PlatformTheme
 
 val fileWriter = FileWriter()
 
-val fileTree = FileTree(RootFolder, false)
-val rootProjectFileTree = FileTree(RootFolder, true)
+// the file tree where the module will be placed
+val moduleFileTree = FileTree(RootFolder, false)
 
+// the file tree for the root of the project (for locating settings.gradle)
+val rootProjectFileTree = FileTree(RootFolder, true)
 fun main() = singleWindowApplication(
     title = "Module Maker",
     state = WindowState(width = 1280.dp, height = 768.dp),
@@ -48,52 +74,71 @@ fun main() = singleWindowApplication(
 
 @Composable
 fun MainView() {
-    Row(Modifier.fillMaxSize()) {
-        val currentlySelectedModuleRoot = remember { mutableStateOf(fileTree.lastSelectedFile.file.file.jvmFile) }
-        val onSelectedFileChange = { file: File ->
-            currentlySelectedModuleRoot.value = file.jvmFile
+    val openSettings = remember { mutableStateOf(false) }
+    val onOpenSettingsChange = { value: Boolean ->
+        openSettings.value = value
+    }
+    Box(
+        contentAlignment = Alignment.TopEnd
+    ) {
+        Icon(
+            modifier = Modifier.padding(16.dp)
+                .clickable {
+                    onOpenSettingsChange.invoke(openSettings.value.not())
+                },
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Settings",
+            tint = LocalContentColor.current,
+        )
+        Row(Modifier.fillMaxSize()) {
+            val currentlySelectedModuleRoot = remember { mutableStateOf(moduleFileTree.lastSelectedFile.file.file.jvmFile) }
+            val onSelectedFileChange = { file: File ->
+                currentlySelectedModuleRoot.value = file.jvmFile
+            }
+
+            val currentlySelectedSettingsGradle =
+                remember { mutableStateOf(rootProjectFileTree.lastSelectedFile.file.file.jvmFile) }
+            val onSelectedRootProjectFileChange = { file: File ->
+                currentlySelectedSettingsGradle.value = file.jvmFile
+            }
+
+            Column {
+                FileTreeColumn(
+                    modifier = Modifier.weight(1f),
+                    onSelectedFileChange = onSelectedRootProjectFileChange,
+                    header = "Select settings.gradle(.kts) file",
+                    fileTree = rootProjectFileTree,
+                )
+                FileTreeColumn(
+                    modifier = Modifier.weight(1f),
+                    onSelectedFileChange = onSelectedFileChange,
+                    header = "Select root module location",
+                    fileTree = moduleFileTree,
+                )
+            }
+
+            ModuleMakerColumn(currentlySelectedModuleRoot.value, currentlySelectedSettingsGradle.value)
         }
 
-        val currentlySelectedSettingsGradle =
-            remember { mutableStateOf(rootProjectFileTree.lastSelectedFile.file.file.jvmFile) }
-        val onSelectedRootProjectFileChange = { file: File ->
-            currentlySelectedSettingsGradle.value = file.jvmFile
+        if (openSettings.value) {
+            Settings(onOpenSettingsChange)
         }
-
-        Column {
-            FileTreeColumn(
-                modifier = Modifier.weight(1f),
-                onSelectedFileChange = onSelectedRootProjectFileChange,
-                header = "Select settings.gradle(.kts) file",
-                fileTree = rootProjectFileTree,
-            )
-            FileTreeColumn(
-                modifier = Modifier.weight(1f),
-                onSelectedFileChange = onSelectedFileChange,
-                header = "Select root module location",
-                fileTree = fileTree,
-            )
-        }
-
-        ModuleMakerColumn(currentlySelectedModuleRoot.value, currentlySelectedSettingsGradle.value)
     }
 }
 
 @Composable
 fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.io.File) {
-
     val showErrorDialog = remember { mutableStateOf(false) }
     val showSuccessDialog = remember { mutableStateOf(false) }
 
-
-    var selectedModuleName by remember { mutableStateOf("") }
+    val selectedModuleName = remember { mutableStateOf("") }
     val onModuleNameChange = { text: String ->
-        selectedModuleName = text
+        selectedModuleName.value = text
     }
 
-    var selectedModuleType by remember { mutableStateOf(ModuleType.ANDROID) }
+    val selectedModuleType = remember { mutableStateOf(ModuleType.ANDROID) }
     val onModuleTypeChange = { moduleType: ModuleType ->
-        selectedModuleType = moduleType
+        selectedModuleType.value = moduleType
     }
 
     Column(Modifier.wrapContentWidth().fillMaxHeight(), Arrangement.spacedBy(5.dp)) {
@@ -107,7 +152,7 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         )
 
         ModuleType(
-            selected = selectedModuleType,
+            selected = selectedModuleType.value,
             onSelectedChange = onModuleTypeChange
         )
 
@@ -115,12 +160,13 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
             onModuleNameChange
         )
 
-        Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+        Button(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
             onClick = {
                 fileWriter.createModule(
                     settingsGradleFile = settingsGradle,
-                    modulePathAsString = selectedModuleName,
-                    moduleType = selectedModuleType,
+                    modulePathAsString = selectedModuleName.value,
+                    moduleType = selectedModuleType.value,
                     showErrorDialog = showErrorDialog,
                     showSuccessDialog = showSuccessDialog,
                     workingDirectory = currentlySelectedFile
@@ -131,7 +177,7 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         }
 
         if (showErrorDialog.value) {
-            AlertDialog(
+            CustomAlertDialog(
                 title = "Error",
                 body = "Please enter a valid name",
                 confirmButtonText = "Okay",
@@ -145,7 +191,7 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         }
 
         if (showSuccessDialog.value) {
-            AlertDialog(
+            CustomAlertDialog(
                 title = "Success!",
                 body = "Module created",
                 confirmButtonText = "Okay",
@@ -192,7 +238,7 @@ fun FileTreeColumn(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AlertDialog(
+fun CustomAlertDialog(
     title: String,
     body: String,
     confirmButtonText: String,
@@ -225,7 +271,8 @@ fun AlertDialog(
                     Button(
                         onClick = {
                             confirmOnClick.invoke()
-                        }) {
+                        }
+                    ) {
                         Text(confirmButtonText)
                     }
                 },

@@ -75,7 +75,6 @@ class FileWriter {
             moduleFile = moduleFile,
         )
 
-
         showSuccessDialog.value = true
     }
 
@@ -111,7 +110,7 @@ class FileWriter {
         val include = "include"
 
         // TODO - add ability to specify keyword
-        val projectIncludeKeyword = if(settingsFile.contains(includeProject)) {
+        val projectIncludeKeyword = if (settingsFile.contains(includeProject)) {
             includeProject
         } else {
             include
@@ -136,15 +135,14 @@ class FileWriter {
             it.isNotEmpty() && it.toLowerCase(Locale.current) >= textToWrite.toLowerCase(Locale.current)
         }
 
-        if(insertionIndex < 0) {
+        if (insertionIndex < 0) {
             // insert it at the end as nothing is past it
             settingsFile.add(lastLineNumberOfFirstIncludeProjectStatement + 1, textToWrite)
         } else {
-            // insert it in our original list adding the original offset of the first line 
+            // insert it in our original list adding the original offset of the first line
             settingsFile.add(insertionIndex + firstLineNumberOfFirstIncludeProjectStatement, textToWrite)
         }
 
         Files.write(Paths.get(settingsGradleFile.toURI()), settingsFile)
-
     }
 }

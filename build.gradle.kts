@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -7,6 +6,8 @@ plugins {
     id("org.jetbrains.compose") version "1.2.1"
 }
 
+apply(from = "gradle/spotless.gradle")
+
 group = "com.joer.module_maker"
 version = "1.0"
 
@@ -14,6 +15,12 @@ repositories {
     mavenCentral()
     google()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+}
+
+buildscript {
+    dependencies {
+        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.11.0")
+    }
 }
 
 dependencies {

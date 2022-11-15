@@ -3,7 +3,10 @@ package filetree
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.io.FilenameFilter
 import java.io.IOException
@@ -20,13 +23,12 @@ fun java.io.File.toProjectFile(): File = object : File {
 
     override val children: List<File>
         get() = this@toProjectFile
-            .listFiles(FilenameFilter { _, name -> !name.startsWith(".")})
+            .listFiles(FilenameFilter { _, name -> !name.startsWith(".") })
             .orEmpty()
             .map { it.toProjectFile() }
 
     override val hasChildren: Boolean
         get() = isDirectory && (listFiles()?.size ?: 0) > 0
-
 
     override fun readLines(scope: CoroutineScope): TextLines {
         var byteBufferSize: Int

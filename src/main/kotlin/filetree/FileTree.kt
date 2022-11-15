@@ -61,7 +61,7 @@ class FileTree(root: File, val allowFileSelection: Boolean) {
             }
             is ItemType.File -> {
                 // we only want to allow file selection when selecting for the settings.gradle file
-                if(allowFileSelection) {
+                if (allowFileSelection) {
                     lastSelectedFile = Item(ExpandableFile(file = file.file, level = this.level), true)
                     onSelectedFileChange?.invoke(lastSelectedFile.file.file)
                 } else {

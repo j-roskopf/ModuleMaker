@@ -1,13 +1,22 @@
 package template
 
+import composables.settings.ANDROID_KEY
+import composables.settings.KOTLIN_KEY
+import composables.settings.SETTINGS_KEY
 import data.ModuleType
 import freemarker.template.Configuration
 import freemarker.template.Template
 import freemarker.template.TemplateException
-import java.io.*
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+import java.io.Writer
 import java.nio.file.Paths
+import java.util.prefs.Preferences
 
 class TemplateWriter {
+
+    private val preferences = Preferences.userRoot().node(SETTINGS_KEY)
 
     /**
      * Creates gradle file for the module from base gradle template file
@@ -20,15 +29,35 @@ class TemplateWriter {
         val cfg = Configuration()
 
         try {
-            // load gradle file from template folder
-            val gradleTemplate: Template = cfg.getTemplate("src/main/resources/moduleGradle.ftl")
-
             // Build the data-model
             val data: MutableMap<String, Any> = HashMap()
-            when (moduleType) {
-                // TODO - allow for custom templates
-                ModuleType.KOTLIN -> data["isKotlinLibrary"] = true
-                ModuleType.ANDROID -> data["isAndroidLibrary"] = true
+
+            // load gradle file from template folder
+            val gradleTemplate: Template = when (moduleType) {
+                ModuleType.KOTLIN -> {
+                    val customKotlinPreference = preferences.get(KOTLIN_KEY, "")
+                    if (customKotlinPreference.isNotEmpty()) {
+                        Template.getPlainTextTemplate(
+                            "kotlinModule.ftl",
+                            customKotlinPreference,
+                            Configuration()
+                        )
+                    } else {
+                        cfg.getTemplate("src/main/resources/kotlinModule.ftl")
+                    }
+                }
+                ModuleType.ANDROID -> {
+                    val customAndroidTemplate = preferences.get(ANDROID_KEY, "")
+                    if (customAndroidTemplate.isNotEmpty()) {
+                        Template.getPlainTextTemplate(
+                            "androidModule.ftl",
+                            customAndroidTemplate,
+                            Configuration()
+                        )
+                    } else {
+                        cfg.getTemplate("src/main/resources/androidModule.ftl")
+                    }
+                }
                 ModuleType.UNKNOWN -> throw IllegalArgumentException("Unknown module type")
             }
 
@@ -60,7 +89,7 @@ class TemplateWriter {
 
             // dashes are not valid characters for a manifest. there are others, but hopefully sensible naming conventions
             // prevent those from showing up
-            data["moduleName"] = moduleName.replace("-","_")
+            data["moduleName"] = moduleName.replace("-", "_")
 
             // create directory for manifest
             val manifestFile = Paths.get(moduleFile.absolutePath, "src/main/").toFile()

@@ -1,0 +1,29 @@
+apply plugin: "com.diffplug.spotless"
+
+spotless {
+    java {
+        target '**/*.java'
+        googleJavaFormat().aosp()
+        importOrder 'top', 'android', 'com', 'net', 'org', 'uk', '/^javax?/'
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+
+    kotlin {
+        target '**/*.kt'
+        ktlint("0.41.0")
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+
+    format 'misc', {
+        target '**/*.gradle', '**/*.md', '**/.gitignore'
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+}

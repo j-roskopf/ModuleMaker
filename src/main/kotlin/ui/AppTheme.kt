@@ -18,5 +18,4 @@ object AppTheme {
             primary = Color.White
         ),
     )
-
 }
