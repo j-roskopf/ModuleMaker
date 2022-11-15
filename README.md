@@ -1,6 +1,6 @@
 # Module Maker
 
-![maker](./assets/maker.png)
+![maker](./assets/main.png)
 
 ## What is this?
 
