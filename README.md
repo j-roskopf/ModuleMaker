@@ -12,7 +12,7 @@ Currently, you can generated Kotlin or Android modules. A barebones template is 
 
 ## Example
 
-https://user-images.githubusercontent.com/7951665/201574884-0de4e082-757f-426a-97f9-8b027036dc88.mov
+https://user-images.githubusercontent.com/7951665/201937365-a0051858-a154-4691-91e5-9850a393c4b3.mov
 
 ## How to contribute
 1. Download [IntelliJ](https://www.jetbrains.com/idea/download/)
