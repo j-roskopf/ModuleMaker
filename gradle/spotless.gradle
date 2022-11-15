@@ -1,29 +1,25 @@
 apply plugin: "com.diffplug.spotless"
 
 spotless {
+    format 'misc', {
+        // define the files to apply `misc` to
+        target '*.gradle', '*.md', '.gitignore'
+
+        // define the steps to apply to those files
+        trimTrailingWhitespace()
+        indentWithTabs()
+        endWithNewline()
+    }
+
     java {
         target '**/*.java'
         googleJavaFormat().aosp()
-        importOrder 'top', 'android', 'com', 'net', 'org', 'uk', '/^javax?/'
         removeUnusedImports()
-        trimTrailingWhitespace()
-        indentWithSpaces()
-        endWithNewline()
     }
 
     kotlin {
         target '**/*.kt'
         ktlint("0.41.0")
-        trimTrailingWhitespace()
-        indentWithSpaces()
-        endWithNewline()
     }
-
-    format 'misc', {
-        target '**/*.gradle', '**/*.md', '**/.gitignore'
-        indentWithSpaces()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-
+    
 }

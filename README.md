@@ -18,9 +18,9 @@ https://user-images.githubusercontent.com/7951665/201937365-a0051858-a154-4691-9
 1. Download [IntelliJ](https://www.jetbrains.com/idea/download/)
 2. Make relevant changes
 3. Test said changes. You can either create a new run configuration like so
-   1. ![config](./assets/config.png)
-   2. Or you can run via gradle with `./gradlew run`
-   3. Click the green play icon in the `main()` function
+1. ![config](./assets/config.png)
+2. Or you can run via gradle with `./gradlew run`
+3. Click the green play icon in the `main()` function
 
 ## Generating binaries
 Right now, generating a binary wouldn't be super useful for us because the path assumed in the code is that of the path of the folder. It is a future enhancement to make this a standalone application.
