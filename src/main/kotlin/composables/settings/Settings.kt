@@ -88,17 +88,6 @@ private fun Templates(onOpenSettingsChange: (Boolean) -> Unit) {
 
     Column {
 
-        Button(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            onClick = {
-                preferences.put(KOTLIN_KEY, kotlinText.value)
-                preferences.put(ANDROID_KEY, androidText.value)
-                onOpenSettingsChange.invoke(false)
-            }
-        ) {
-            Text("Save")
-        }
-
         Text(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             text = "Kotlin module template file"
@@ -134,8 +123,18 @@ private fun Templates(onOpenSettingsChange: (Boolean) -> Unit) {
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
             )
-
         )
+
+        Button(
+            modifier = Modifier.padding(16.dp),
+            onClick = {
+                preferences.put(KOTLIN_KEY, kotlinText.value)
+                preferences.put(ANDROID_KEY, androidText.value)
+                onOpenSettingsChange.invoke(false)
+            }
+        ) {
+            Text("Save")
+        }
     }
 }
 
