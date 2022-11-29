@@ -201,7 +201,7 @@ class FileWriter {
         val include = "include"
 
         // TODO - add ability to specify keyword
-        val projectIncludeKeyword = if (settingsFile.contains(includeProject)) {
+        val projectIncludeKeyword = if (settingsFile.any { it.contains("includeProject") }) {
             includeProject
         } else {
             include
