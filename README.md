@@ -8,7 +8,13 @@ As we create more modules, it will become useful to be able to create a module f
 
 ## What is supported
 
-Currently, you can generated Kotlin or Android modules. A barebones template is provided for each, but can also be overridden by navigating to the settings page and adding your own template.
+Currently, you can generate Kotlin or Android modules. A barebones template is provided for each, but can also be overridden by navigating to the settings page and adding your own template.
+
+You can also have a created module follow an 'enhanced' structure. This 'enhanced' structure is based off Square's sub-modularization strategy.
+
+![square](./assets/square.png) 
+
+The default names that have been chosen for now are `:api` (analogous to `:public`) `:impl` (analogous to `:impl`) and `:glue` (analogous to `:impl-wiring`)
 
 ## Example
 
