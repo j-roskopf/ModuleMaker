@@ -25,6 +25,8 @@ class TemplateWriter {
         moduleFile: File,
         moduleName: String,
         moduleType: ModuleType,
+        useKtsBuildFile: Boolean,
+        defaultKey: String?,
     ) {
         val cfg = Configuration()
 
@@ -35,34 +37,47 @@ class TemplateWriter {
             // load gradle file from template folder
             val gradleTemplate: Template = when (moduleType) {
                 ModuleType.KOTLIN -> {
-                    val customKotlinPreference = preferences.get(KOTLIN_KEY, "")
-                    if (customKotlinPreference.isNotEmpty()) {
+                    val customPreferences = preferences.get(defaultKey ?: KOTLIN_KEY, "")
+                    if (customPreferences.isNotEmpty()) {
                         Template.getPlainTextTemplate(
-                            "kotlinModule.ftl",
-                            customKotlinPreference,
+                            if(useKtsBuildFile) "kotlinModuleKts.ftl" else "kotlinModule.ftl",
+                            customPreferences,
                             Configuration()
                         )
                     } else {
-                        cfg.getTemplate("src/main/resources/kotlinModule.ftl")
+                        if(useKtsBuildFile) {
+                            cfg.getTemplate("src/main/resources/kotlinModuleKts.ftl")
+                        } else {
+                            cfg.getTemplate("src/main/resources/kotlinModule.ftl")
+                        }
                     }
                 }
                 ModuleType.ANDROID -> {
-                    val customAndroidTemplate = preferences.get(ANDROID_KEY, "")
-                    if (customAndroidTemplate.isNotEmpty()) {
+                    val customPreferences = preferences.get(defaultKey ?: ANDROID_KEY, "")
+                    if (customPreferences.isNotEmpty()) {
                         Template.getPlainTextTemplate(
-                            "androidModule.ftl",
-                            customAndroidTemplate,
+                            if(useKtsBuildFile) "androidModuleKts.ftl" else "androidModule.ftl",
+                            customPreferences,
                             Configuration()
                         )
                     } else {
-                        cfg.getTemplate("src/main/resources/androidModule.ftl")
+                        if(useKtsBuildFile) {
+                            cfg.getTemplate("src/main/resources/androidModuleKts.ftl")
+                        } else {
+                            cfg.getTemplate("src/main/resources/androidModule.ftl")
+                        }
                     }
                 }
                 ModuleType.UNKNOWN -> throw IllegalArgumentException("Unknown module type")
             }
 
             // File output
-            val file: Writer = FileWriter(Paths.get(moduleFile.absolutePath, moduleName.plus(".gradle")).toFile())
+            val extension = if(useKtsBuildFile) {
+                ".gradle.kts"
+            } else {
+                ".gradle"
+            }
+            val file: Writer = FileWriter(Paths.get(moduleFile.absolutePath, moduleName.plus(extension)).toFile())
             gradleTemplate.process(data, file)
             file.flush()
             file.close()

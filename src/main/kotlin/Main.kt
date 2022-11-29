@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -141,6 +142,16 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         selectedModuleType.value = moduleType
     }
 
+    val enhancedModuleCreationStrategy = remember { mutableStateOf(false) }
+    val onCreationStrategyChange = { checked: Boolean ->
+        enhancedModuleCreationStrategy.value = checked
+    }
+
+    val useKtsBuildFile = remember { mutableStateOf(true) }
+    val useKtsBuildFileChanged = { checked: Boolean ->
+        useKtsBuildFile.value = checked
+    }
+
     Column(Modifier.wrapContentWidth().fillMaxHeight(), Arrangement.spacedBy(5.dp)) {
 
         SelectedDirectory(
@@ -150,6 +161,28 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         SelectedSettingsGradle(
             settingsGradle.absolutePath
         )
+
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                enhancedModuleCreationStrategy.value,
+                onCheckedChange = onCreationStrategyChange
+            )
+            Text("3 Module creation")
+        }
+
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                useKtsBuildFile.value,
+                onCheckedChange = useKtsBuildFileChanged
+            )
+            Text(".kts")
+        }
 
         ModuleType(
             selected = selectedModuleType.value,
@@ -169,7 +202,9 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
                     moduleType = selectedModuleType.value,
                     showErrorDialog = showErrorDialog,
                     showSuccessDialog = showSuccessDialog,
-                    workingDirectory = currentlySelectedFile
+                    workingDirectory = currentlySelectedFile,
+                    enhancedModuleCreationStrategy = enhancedModuleCreationStrategy.value,
+                    useKtsBuildFile = useKtsBuildFile.value
                 )
             }
         ) {

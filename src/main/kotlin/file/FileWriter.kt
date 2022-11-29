@@ -3,6 +3,9 @@ package file
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
+import composables.settings.API_KEY
+import composables.settings.GLUE_KEY
+import composables.settings.IMPL_KEY
 import data.ModuleType
 import template.TemplateWriter
 import java.io.File
@@ -24,6 +27,8 @@ class FileWriter {
         moduleType: ModuleType,
         showErrorDialog: MutableState<Boolean>,
         showSuccessDialog: MutableState<Boolean>,
+        enhancedModuleCreationStrategy: Boolean,
+        useKtsBuildFile: Boolean,
     ) {
         val fileReady = modulePathAsString.replace(":", "/")
 
@@ -47,13 +52,100 @@ class FileWriter {
         addToSettingsAtCorrectLocation(
             modulePathAsString = modulePathAsString,
             settingsGradleFile = settingsGradleFile,
+            enhancedModuleCreationStrategy = enhancedModuleCreationStrategy,
         )
 
+        if (enhancedModuleCreationStrategy) {
+            createEnhancedModuleStructure(
+                moduleFile = moduleFile,
+                moduleType = moduleType,
+                useKtsBuildFile = useKtsBuildFile,
+            )
+        } else {
+            createDefaultModuleStructure(
+                moduleFile = moduleFile,
+                moduleName = moduleName,
+                moduleType = moduleType,
+                useKtsBuildFile = useKtsBuildFile,
+            )
+        }
+
+        showSuccessDialog.value = true
+    }
+
+    private fun createEnhancedModuleStructure(
+        moduleFile: File,
+        moduleType: ModuleType,
+        useKtsBuildFile: Boolean
+    ) {
+        // make the 3 module
+        moduleFile.toPath().resolve("glue").toFile().apply {
+            mkdirs()
+            // create the gradle file
+            templateWriter.createGradleFile(
+                moduleFile = this,
+                moduleName = "glue",
+                moduleType = moduleType,
+                useKtsBuildFile = useKtsBuildFile,
+                defaultKey = GLUE_KEY,
+            )
+
+            // create default packages
+            createDefaultPackages(
+                moduleFile = this,
+            )
+        }
+        moduleFile.toPath().resolve("impl").toFile().apply {
+            mkdirs()
+            templateWriter.createGradleFile(
+                moduleFile = this,
+                moduleName = "impl",
+                moduleType = moduleType,
+                useKtsBuildFile = useKtsBuildFile,
+                defaultKey = IMPL_KEY,
+            )
+
+            // create default packages
+            createDefaultPackages(
+                moduleFile = this,
+            )
+        }
+        moduleFile.toPath().resolve("api").toFile().apply {
+            mkdirs()
+            templateWriter.createGradleFile(
+                moduleFile = this,
+                moduleName = "api",
+                moduleType = moduleType,
+                useKtsBuildFile = useKtsBuildFile,
+                defaultKey = API_KEY,
+            )
+
+            // create readme file for the api module
+            templateWriter.createReadmeFile(
+                moduleFile = this,
+                moduleName = "api",
+            )
+
+            // create default packages
+            createDefaultPackages(
+                moduleFile = this,
+            )
+        }
+    }
+
+    private fun createDefaultModuleStructure(
+        moduleFile: File,
+        moduleName: String,
+        moduleType: ModuleType,
+        useKtsBuildFile: Boolean,
+    ) {
         // create gradle files
         templateWriter.createGradleFile(
             moduleFile = moduleFile,
             moduleName = moduleName,
             moduleType = moduleType,
+            useKtsBuildFile = useKtsBuildFile,
+            defaultKey = null,
         )
 
         // create readme file
@@ -74,8 +166,6 @@ class FileWriter {
         createDefaultPackages(
             moduleFile = moduleFile,
         )
-
-        showSuccessDialog.value = true
     }
 
     /**
@@ -102,6 +192,7 @@ class FileWriter {
     private fun addToSettingsAtCorrectLocation(
         settingsGradleFile: File,
         modulePathAsString: String,
+        enhancedModuleCreationStrategy: Boolean,
     ) {
 
         val settingsFile = Files.readAllLines(Paths.get(settingsGradleFile.toURI()))
@@ -126,9 +217,18 @@ class FileWriter {
         }
 
         // sub list them and create a new list so we aren't modifying the original
-        val includeProjectStatements = settingsFile.subList(firstLineNumberOfFirstIncludeProjectStatement, lastLineNumberOfFirstIncludeProjectStatement + 1).toMutableList()
+        val includeProjectStatements = settingsFile.subList(
+            firstLineNumberOfFirstIncludeProjectStatement,
+            lastLineNumberOfFirstIncludeProjectStatement + 1
+        ).toMutableList()
 
-        val textToWrite = "$projectIncludeKeyword(\"".plus(modulePathAsString).plus("\")")
+        val textToWrite = if (enhancedModuleCreationStrategy) {
+            "$projectIncludeKeyword(\"".plus(modulePathAsString.plus(":api")).plus("\")").plus("\n")
+                .plus("$projectIncludeKeyword(\"".plus(modulePathAsString.plus(":impl")).plus("\")")).plus("\n")
+                .plus("$projectIncludeKeyword(\"".plus(modulePathAsString.plus(":glue")).plus("\")"))
+        } else {
+            "$projectIncludeKeyword(\"".plus(modulePathAsString).plus("\")")
+        }
 
         // the spot we want to insert it is the first line we find that is after it alphabetically
         val insertionIndex = includeProjectStatements.indexOfFirst {

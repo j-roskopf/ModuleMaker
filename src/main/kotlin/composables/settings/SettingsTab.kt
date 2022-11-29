@@ -1,6 +1,7 @@
 package composables.settings
 
 enum class SettingsTab {
-    TEMPLATES,
+    TEMPLATES_DEFAULT,
+    TEMPLATES_ENHANCED,
     GENERAL,
 }
