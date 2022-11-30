@@ -27,6 +27,7 @@ class TemplateWriter {
         moduleType: ModuleType,
         useKtsBuildFile: Boolean,
         defaultKey: String?,
+        gradleFileFollowModule: Boolean,
     ) {
         val cfg = Configuration()
 
@@ -77,7 +78,12 @@ class TemplateWriter {
             } else {
                 ".gradle"
             }
-            val file: Writer = FileWriter(Paths.get(moduleFile.absolutePath, moduleName.plus(extension)).toFile())
+            val fileName = if(gradleFileFollowModule) {
+                moduleName.plus(extension)
+            } else {
+                "build".plus(extension)
+            }
+            val file: Writer = FileWriter(Paths.get(moduleFile.absolutePath, fileName).toFile())
             gradleTemplate.process(data, file)
             file.flush()
             file.close()

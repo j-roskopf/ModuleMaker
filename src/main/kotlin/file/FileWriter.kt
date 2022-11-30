@@ -29,6 +29,7 @@ class FileWriter {
         showSuccessDialog: MutableState<Boolean>,
         enhancedModuleCreationStrategy: Boolean,
         useKtsBuildFile: Boolean,
+        gradleFileFollowModule: Boolean,
     ) {
         val fileReady = modulePathAsString.replace(":", "/")
 
@@ -60,6 +61,7 @@ class FileWriter {
                 moduleFile = moduleFile,
                 moduleType = moduleType,
                 useKtsBuildFile = useKtsBuildFile,
+                gradleFileFollowModule = gradleFileFollowModule,
             )
         } else {
             createDefaultModuleStructure(
@@ -67,6 +69,7 @@ class FileWriter {
                 moduleName = moduleName,
                 moduleType = moduleType,
                 useKtsBuildFile = useKtsBuildFile,
+                gradleFileFollowModule = gradleFileFollowModule,
             )
         }
 
@@ -76,7 +79,8 @@ class FileWriter {
     private fun createEnhancedModuleStructure(
         moduleFile: File,
         moduleType: ModuleType,
-        useKtsBuildFile: Boolean
+        useKtsBuildFile: Boolean,
+        gradleFileFollowModule: Boolean,
     ) {
         // make the 3 module
         moduleFile.toPath().resolve("glue").toFile().apply {
@@ -88,6 +92,7 @@ class FileWriter {
                 moduleType = moduleType,
                 useKtsBuildFile = useKtsBuildFile,
                 defaultKey = GLUE_KEY,
+                gradleFileFollowModule = gradleFileFollowModule,
             )
 
             // create default packages
@@ -103,6 +108,7 @@ class FileWriter {
                 moduleType = moduleType,
                 useKtsBuildFile = useKtsBuildFile,
                 defaultKey = IMPL_KEY,
+                gradleFileFollowModule = gradleFileFollowModule,
             )
 
             // create default packages
@@ -118,6 +124,7 @@ class FileWriter {
                 moduleType = moduleType,
                 useKtsBuildFile = useKtsBuildFile,
                 defaultKey = API_KEY,
+                gradleFileFollowModule = gradleFileFollowModule,
             )
 
             // create readme file for the api module
@@ -138,6 +145,7 @@ class FileWriter {
         moduleName: String,
         moduleType: ModuleType,
         useKtsBuildFile: Boolean,
+        gradleFileFollowModule: Boolean,
     ) {
         // create gradle files
         templateWriter.createGradleFile(
@@ -146,6 +154,7 @@ class FileWriter {
             moduleType = moduleType,
             useKtsBuildFile = useKtsBuildFile,
             defaultKey = null,
+            gradleFileFollowModule = gradleFileFollowModule,
         )
 
         // create readme file

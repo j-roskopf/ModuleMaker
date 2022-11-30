@@ -152,6 +152,11 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
         useKtsBuildFile.value = checked
     }
 
+    val gradleFileFollowModule = remember { mutableStateOf(false) }
+    val gradleFileFollowModuleChanged = { checked: Boolean ->
+        gradleFileFollowModule.value = checked
+    }
+
     Column(Modifier.wrapContentWidth().fillMaxHeight(), Arrangement.spacedBy(5.dp)) {
 
         SelectedDirectory(
@@ -184,6 +189,17 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
             Text(".kts")
         }
 
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                gradleFileFollowModule.value,
+                onCheckedChange = gradleFileFollowModuleChanged
+            )
+            Text("Gradle file named after module")
+        }
+
         ModuleType(
             selected = selectedModuleType.value,
             onSelectedChange = onModuleTypeChange
@@ -204,7 +220,8 @@ fun ModuleMakerColumn(currentlySelectedFile: java.io.File, settingsGradle: java.
                     showSuccessDialog = showSuccessDialog,
                     workingDirectory = currentlySelectedFile,
                     enhancedModuleCreationStrategy = enhancedModuleCreationStrategy.value,
-                    useKtsBuildFile = useKtsBuildFile.value
+                    useKtsBuildFile = useKtsBuildFile.value,
+                    gradleFileFollowModule = gradleFileFollowModule.value,
                 )
             }
         ) {
