@@ -2,9 +2,11 @@
 
 ![maker](./assets/main.png)
 
+![settings](./assets/settings.png)
+
 ## What is this?
 
-As we create more modules, it will become useful to be able to create a module from a template. This is a desktop compose application that allows one to create modules without having to copy / paste / modify existing modules.
+As we create more modules in Android applications, it will become useful to be able to create a module from a template. This is a desktop compose application that allows one to create modules without having to copy / paste / modify existing modules.
 
 ## What is supported
 
@@ -29,8 +31,7 @@ https://user-images.githubusercontent.com/7951665/201937365-a0051858-a154-4691-9
 3. Click the green play icon in the `main()` function
 
 ## Generating binaries
-Right now, generating a binary wouldn't be super useful for us because the path assumed in the code is that of the path of the folder. It is a future enhancement to make this a standalone application.
-But to generate new binaries, you have to have at least Java 15 set as your default, and then you can run `./gradlew package` and you will see the relevant `.dmg` and `.app` binaries in the `/build/compose/binaries/main/` folder. To create a jar, execute `./gradlew packageUberJarForCurrentOS` which will generate a jar for the current OS in `/build/compose/jar`
+To generate new binaries, you have to have at least Java 15 set as your default, and then you can run `./gradlew package` and you will see the relevant `.dmg` and `.app` binaries in the `/build/compose/binaries/main/` folder. To create a jar, execute `./gradlew packageUberJarForCurrentOS` which will generate a jar for the current OS in `/build/compose/jar`
 
 There is a helpful bash script to generate a new jar and include it at the base directory of this project that can be executed via `./packageAndRun.sh`. This method works with Java 11.
 
